@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const WaterReminderApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class WaterReminderApp extends StatelessWidget {
+  const WaterReminderApp({super.key});
 
   @override
   Widget build(BuildContext context) {
