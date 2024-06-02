@@ -10,11 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^0.13.3
-  cupertino_icons: ^1.0.8
   provider: ^6.1.2
-  rxdart: ^0.27.7
-  flutter_local_notifications: ^17.1.2
-  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:
