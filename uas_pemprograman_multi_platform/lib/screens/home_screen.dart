@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
+import '../provider/user_provider.dart';
 import 'user_screen.dart';
 import 'water_intake_screen.dart';
 
