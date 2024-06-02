@@ -1,19 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'screens/login_screen.dart';
+import 'screens/home_screen.dart';
+import 'services/api_service.dart';
+import 'providers/user_provider.dart';
 
 void main() {
-  runApp(const WaterReminderApp());
+  runApp(MyApp());
 }
 
-class WaterReminderApp extends StatelessWidget {
-  const WaterReminderApp({super.key});
-
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Water Reminder',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
         ),
+        home: LoginScreen(),
       ),
     );
   }
