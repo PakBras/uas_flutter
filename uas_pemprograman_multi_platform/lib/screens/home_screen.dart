@@ -5,13 +5,15 @@ import 'user_screen.dart';
 import 'water_intake_screen.dart';
 
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final user = userProvider.user;
 
     return Scaffold(
-      appBar: AppBar(title: Text('Home')),
+      appBar: AppBar(title: const Text('Home')),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -25,7 +27,7 @@ class HomeScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => UserScreen(user: user)),
                   );
                 },
-                child: Text('User Data'),
+                child: const Text('User Data'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -34,10 +36,10 @@ class HomeScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => WaterIntakeScreen(user: user)),
                   );
                 },
-                child: Text('Water Intake History'),
+                child: const Text('Water Intake History'),
               ),
             ] else ...[
-              Text('User not found'),
+              const Text('User not found'),
             ],
           ],
         ),

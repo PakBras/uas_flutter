@@ -1,50 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import '../models/user.dart';
 import '../models/water_intake.dart';
+import '../services/api_service.dart';
 
 class UserProvider with ChangeNotifier {
-  final ApiService _apiService = ApiService('https://your-api-url.com'); // replace with your API URL
+  final ApiService _apiService;
 
+  UserProvider(this._apiService);
+
+  User? _user;
   List<WaterIntake> _waterIntakes = [];
 
-  List<WaterIntake> get waterIntakes {
-    return [..._waterIntakes];
+  User? get user => _user;
+  List<WaterIntake> get waterIntakes => _waterIntakes;
+
+  Future<void> login(String username, String password) async {
+    try {
+      _user = await _apiService.login(username, password);
+      notifyListeners();
+    } catch (e) {
+      // Handle login error
+    }
   }
 
-  Future<void> fetchWaterIntake(int userId) async {
+  Future<void> fetchUserData(int userId) async {
+    try {
+      _user = await _apiService.getUser(userId);
+      notifyListeners();
+    } catch (e) {
+      // Handle error
+    }
+  }
+
+  Future<void> updateUser(User updatedUser) async {
+    try {
+      _user = await _apiService.updateUser(updatedUser);
+      notifyListeners();
+    } catch (e) {
+      // Handle error
+    }
+  }
+
+  Future<void> recordWaterIntake(WaterIntake intake) async {
+    try {
+      final newIntake = await _apiService.addWaterIntake(intake);
+      if (newIntake != null) {
+        _waterIntakes.add(newIntake);
+        notifyListeners();
+      }
+    } catch (e) {
+      // Handle error
+    }
+  }
+
+  Future<List<WaterIntake>> fetchWaterIntake(int userId) async {
     try {
       _waterIntakes = await _apiService.getWaterIntakes(userId);
       notifyListeners();
+      return _waterIntakes;
     } catch (e) {
-      throw Exception('Failed to fetch water intake: $e');
-    }
-  }
-
-  void recordWaterIntake(WaterIntake intake) async {
-    try {
-      await _apiService.addWaterIntake(intake);
-      notifyListeners();
-    } catch (e) {
-      throw Exception('Failed to record water intake: $e');
-    }
-  }
-
-  Future<User?> login(String username, String password) async {
-    try {
-      final user = await _apiService.login(username, password);
-      return user;
-    } catch (e) {
-      throw Exception('Failed to login: $e');
-    }
-  }
-
-  Future<User?> updateUser(User user) async {
-    try {
-      final updatedUser = await _apiService.updateUser(user);
-      return updatedUser;
-    } catch (e) {
-      throw Exception('Failed to update user: $e');
+      // Handle error
+      return [];
     }
   }
 }

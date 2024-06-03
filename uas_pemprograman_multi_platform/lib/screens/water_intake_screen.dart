@@ -1,69 +1,60 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../models/user.dart';
+import '../models/water_intake.dart';
 import '../provider/user_provider.dart';
 
-class WaterIntakeScreen extends StatefulWidget {
+class WaterIntakeScreen extends StatelessWidget {
   final User user;
 
-  WaterIntakeScreen({required this.user});
-
-  @override
-  _WaterIntakeScreenState createState() => _WaterIntakeScreenState();
-}
-
-class _WaterIntakeScreenState extends State<WaterIntakeScreen> {
-  bool _isLoading = false;
-
-  Future<void> fetchWaterIntake() async {
-    try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      await userProvider.fetchWaterIntake(widget.user.id);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to fetch water intake: $e')),
-      );
-    }
-  }
-
-  void recordWaterIntake() async {
-    try {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final newIntake = WaterIntake(
-        id: 0, // generate a new ID or use a UUID package
-        userId: widget.user.id,
-        date: DateTime.now(),
-        volume: 500, // default amount or prompt user to enter
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      );
-      userProvider.recordWaterIntake(newIntake);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to record water intake: $e')),
-      );
-    }
-  }
+  const WaterIntakeScreen({Key? key, required this.user}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Water Intake'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            ElevatedButton(
-              onPressed: fetchWaterIntake,
-              child: Text('Fetch Water Intake'),
-            ),
-            ElevatedButton(
-              onPressed: recordWaterIntake,
-              child: Text('Record Water Intake'),
-            ),
-          ],
+      appBar: AppBar(title: const Text('Water Intake History')),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await userProvider.fetchWaterIntake(user.id);
+        },
+        child: FutureBuilder<List<WaterIntake>>(
+          future: userProvider.fetchWaterIntake(user.id),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(child: Text('No water intake history'));
+            } else {
+              return ListView.builder(
+                itemCount: snapshot.data!.length,
+                itemBuilder: (context, index) {
+                  final intake = snapshot.data![index];
+                  return ListTile(
+                    title: const Text('Drank water'),
+                    subtitle: Text(DateFormat.yMMMd().add_Hms().format(intake.date)),
+                  );
+                },
+              );
+            }
+          },
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          final newIntake = WaterIntake(
+            id: 0,
+            userId: user.id,
+            date: DateTime.now(),
+            amount: 500,
+          );
+          userProvider.recordWaterIntake(newIntake);
+        },
+        child: const Icon(Icons.add),
       ),
     );
   }
