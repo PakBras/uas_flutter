@@ -1,23 +1,7 @@
 class WaterIntake {
-  final DateTime date;
-  final double amount; 
+  final int id;
+  final DateTime timestamp;
+  final int amount;
 
-  WaterIntake({
-    required this.date,
-    required this.amount,
-  });
-
-  factory WaterIntake.fromJson(Map<String, dynamic> json) {
-    return WaterIntake(
-      date: DateTime.parse(json['date']),
-      amount: json['amount'].toDouble(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'date': date.toIso8601String(),
-      'amount': amount,
-    };
-  }
+  WaterIntake({required this.id, required this.timestamp, required this.amount});
 }
