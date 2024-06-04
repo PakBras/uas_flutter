@@ -1,66 +1,36 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 import '../models/user.dart';
 import '../models/water_intake.dart';
-import '../services/api_service.dart';
 
 class UserProvider with ChangeNotifier {
-  final ApiService _apiService;
-
-  UserProvider(this._apiService);
-
+  final ApiService apiService;
   User? _user;
   List<WaterIntake> _waterIntakes = [];
+
+  UserProvider(this.apiService);
 
   User? get user => _user;
   List<WaterIntake> get waterIntakes => _waterIntakes;
 
   Future<void> login(String username, String password) async {
-    try {
-      _user = await _apiService.login(username, password);
-      notifyListeners();
-    } catch (e) {
-      // Handle login error
-    }
-  }
-
-  Future<void> fetchUserData(int userId) async {
-    try {
-      _user = await _apiService.getUser(userId);
-      notifyListeners();
-    } catch (e) {
-      // Handle error
-    }
-  }
-
-  Future<void> updateUser(User updatedUser) async {
-    try {
-      _user = await _apiService.updateUser(updatedUser);
-      notifyListeners();
-    } catch (e) {
-      // Handle error
-    }
-  }
-
-  Future<void> recordWaterIntake(WaterIntake intake) async {
-    try {
-      final newIntake = await _apiService.addWaterIntake(intake);
-      if (newIntake != null) {
-        _waterIntakes.add(newIntake);
-        notifyListeners();
-      }
-    } catch (e) {
-      // Handle error
-    }
+    _user = await apiService.login(username, password);
+    notifyListeners();
   }
 
   Future<List<WaterIntake>> fetchWaterIntake(int userId) async {
-    try {
-      _waterIntakes = await _apiService.getWaterIntakes(userId);
-      notifyListeners();
-      return _waterIntakes;
-    } catch (e) {
-      // Handle error
-      return [];
-    }
+    _waterIntakes = await apiService.getWaterIntakes(userId);
+    notifyListeners();
+    return _waterIntakes;
+  }
+
+  Future<void> recordWaterIntake(WaterIntake intake) async {
+    await apiService.addWaterIntake(intake);
+    await fetchWaterIntake(intake.userId);
+  }
+
+  Future<void> updateUser(User user) async {
+    _user = await apiService.updateUser(user);
+    notifyListeners();
   }
 }
