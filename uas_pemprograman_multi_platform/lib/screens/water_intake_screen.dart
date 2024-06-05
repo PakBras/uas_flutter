@@ -1,60 +1,68 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../models/user.dart';
-import '../models/water_intake.dart';
 import '../provider/user_provider.dart';
+import '../models/water_intake.dart';
 
 class WaterIntakeScreen extends StatelessWidget {
-  final User user;
-
-  const WaterIntakeScreen({Key? key, required this.user}) : super(key: key);
+  const WaterIntakeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Water Intake History')),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await userProvider.fetchWaterIntake(user.id);
-        },
-        child: FutureBuilder<List<WaterIntake>>(
-          future: userProvider.fetchWaterIntake(user.id),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            } else if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-              return const Center(child: Text('No water intake history'));
-            } else {
-              return ListView.builder(
-                itemCount: snapshot.data!.length,
-                itemBuilder: (context, index) {
-                  final intake = snapshot.data![index];
-                  return ListTile(
-                    title: const Text('Drank water'),
-                    subtitle: Text(DateFormat.yMMMd().add_Hms().format(intake.date)),
-                  );
-                },
-              );
-            }
+      appBar: AppBar(
+        title: const Text('Water Intake History'),
+        centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.lightBlueAccent, Colors.blue],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Consumer<UserProvider>(
+          builder: (context, userProvider, _) {
+            final waterIntakes = userProvider.waterIntakes;
+            return ListView.builder(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: waterIntakes.length,
+              itemBuilder: (context, index) {
+                final intake = waterIntakes[index];
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  color: Colors.white,
+                  child: ListTile(
+                    leading: const Icon(Icons.local_drink, color: Colors.blueAccent),
+                    title: const Text(
+                      'Drank water',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      DateFormat.yMMMd().add_Hms().format(intake.date),
+                      style: const TextStyle(color: Colors.black54),
+                    ),
+                  ),
+                );
+              },
+            );
           },
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.white,
         onPressed: () {
           final newIntake = WaterIntake(
             id: 0,
-            userId: user.id,
+            userId: Provider.of<UserProvider>(context, listen: false).user!.id,
             date: DateTime.now(),
             amount: 500,
           );
-          userProvider.recordWaterIntake(newIntake);
+          Provider.of<UserProvider>(context, listen: false).recordWaterIntake(newIntake);
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add, color: Colors.blueAccent),
       ),
     );
   }
