@@ -79,7 +79,7 @@ class LoginScreenState extends State<LoginScreen> {
                     : ElevatedButton(
                         onPressed: _login,
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: Colors.blueAccent, 
+                          foregroundColor: Colors.blueAccent,
                           backgroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                           shape: RoundedRectangleBorder(
@@ -96,32 +96,56 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _login() async {
-    setState(() {
-      _isLoading = true;
-    });
+void _login() async {
+  setState(() {
+    _isLoading = true;
+  });
 
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-    await userProvider.login(
-      _usernameController.text,
-      _passwordController.text,
-    );
+  final userProvider = Provider.of<UserProvider>(context, listen: false);
+  try {
+    if (_usernameController.text.isNotEmpty && _passwordController.text.isNotEmpty) {
+      print('Username: ${_usernameController.text}, Password: ${_passwordController.text}');
+      
+      await userProvider.login(
+        _usernameController.text,
+        _passwordController.text,
+      );
 
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (!mounted) return;
+
+      if (userProvider.user != null) {
+        print('Login successful: ${userProvider.user}');
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomeScreen()),
+        );
+      } else {
+        print('Invalid credentials');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Invalid credentials')),
+        );
+      }
+    } else {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Username and password are required');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username and password are required')),
+      );
+    }
+  } catch (e) {
     setState(() {
       _isLoading = false;
     });
-
-    if (!mounted) return;
-
-    if (userProvider.user != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomeScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid credentials')),
-      );
-    }
+    print('Failed to login: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to login: $e')),
+    );
   }
+}
 }
